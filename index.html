@@ -13,6 +13,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
+      overflow: hidden;
     }
 
     .card {
@@ -23,6 +24,8 @@
       box-shadow: 0 20px 40px rgba(0,0,0,0.25);
       max-width: 380px;
       width: 90%;
+      position: relative;
+      z-index: 2;
     }
 
     h1 { margin-bottom: 18px; }
@@ -65,10 +68,10 @@
       font-size: 16px;
     }
 
-    /* IMAGE IMPROVEMENT */
+    /* ✅ OPTION 2 IMAGE FIX */
     .img-wrap {
       width: 100%;
-      max-height: 260px;
+      aspect-ratio: 4 / 5;
       overflow: hidden;
       border-radius: 16px;
       margin: 15px 0;
@@ -91,6 +94,28 @@
       padding: 10px 12px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.2);
       user-select: none;
+      z-index: 3;
+    }
+
+    /* ❤️ FLOATING HEARTS */
+    .heart {
+      position: fixed;
+      bottom: -20px;
+      font-size: 18px;
+      animation: floatUp 6s linear forwards;
+      opacity: 0.8;
+      z-index: 1;
+    }
+
+    @keyframes floatUp {
+      0% {
+        transform: translateY(0) scale(1);
+        opacity: 0.8;
+      }
+      100% {
+        transform: translateY(-110vh) scale(1.6);
+        opacity: 0;
+      }
     }
   </style>
 </head>
@@ -110,11 +135,25 @@ const musicToggle = document.getElementById("musicToggle");
 let playing = false;
 let noClickedOnce = false;
 
+/* 🎵 MUSIC */
 musicToggle.onclick = () => {
   playing ? music.pause() : music.play();
   musicToggle.textContent = playing ? "🎵" : "⏸️";
   playing = !playing;
 };
+
+/* ❤️ HEART GENERATOR */
+function spawnHeart() {
+  const heart = document.createElement("div");
+  heart.className = "heart";
+  heart.textContent = "❤️";
+  heart.style.left = Math.random() * 100 + "vw";
+  heart.style.fontSize = 14 + Math.random() * 16 + "px";
+  document.body.appendChild(heart);
+
+  setTimeout(() => heart.remove(), 6000);
+}
+setInterval(spawnHeart, 700);
 
 /* -------- STAGE 1 -------- */
 function stage1() {
@@ -131,13 +170,10 @@ function stage1() {
 
   const noBtn = document.getElementById("no1");
   const yesBtn = document.getElementById("yes1");
-  const wrap = document.getElementById("btnWrap");
 
   function moveNo() {
-    const maxX = 90;
-    const maxY = 50;
-    const x = Math.random() * maxX * 2 - maxX;
-    const y = Math.random() * maxY * 2 - maxY;
+    const x = Math.random() * 180 - 90;
+    const y = Math.random() * 100 - 50;
     noBtn.style.transform = `translate(${x}px, ${y}px)`;
   }
 
@@ -161,11 +197,10 @@ function stage1() {
   };
 }
 
-/* -------- STAGE 2 (PASSWORD) -------- */
+/* -------- STAGE 2 -------- */
 function stage2() {
   app.innerHTML = `
     <h1>One last thing 😌</h1>
-    <p>Answer if you're really sure</p>
     <p><b>What is a kiss called?</b></p>
     <input id="pwd" placeholder="type here">
     <br><br>
