@@ -13,49 +13,64 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      overflow: hidden;
     }
 
     .card {
       background: white;
-      padding: 35px 45px;
-      border-radius: 20px;
+      padding: 40px 45px;
+      border-radius: 22px;
       text-align: center;
-      box-shadow: 0 15px 35px rgba(0,0,0,0.25);
-      min-width: 320px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+      max-width: 380px;
+      width: 90%;
     }
 
-    h1 {
-      margin-bottom: 25px;
-    }
+    h1 { margin-bottom: 18px; }
+    p { color: #555; }
 
     .buttons {
       display: flex;
       justify-content: center;
       gap: 25px;
+      margin-top: 20px;
       position: relative;
     }
 
     button {
-      font-size: 18px;
-      padding: 10px 26px;
+      padding: 10px 24px;
+      border-radius: 25px;
       border: none;
-      border-radius: 30px;
       cursor: pointer;
-      position: relative;
-      transition: transform 0.25s ease; /* smooth, human */
+      font-size: 16px;
+      transition: transform 0.25s ease;
+      touch-action: manipulation;
     }
 
-    #yesBtn {
+    .yes {
       background: #ff4d6d;
       color: white;
     }
 
-    #noBtn {
-      background: #ccc;
+    .no {
+      background: #ddd;
     }
 
-    /* 🎵 music button */
+    input {
+      padding: 10px;
+      width: 80%;
+      margin-top: 15px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      text-align: center;
+      font-size: 16px;
+    }
+
+    img {
+      width: 100%;
+      border-radius: 15px;
+      margin: 15px 0;
+    }
+
     #musicToggle {
       position: fixed;
       top: 16px;
@@ -73,63 +88,110 @@
 
 <body>
 
-  <div id="musicToggle">🎵</div>
+<div id="musicToggle">🎵</div>
+<audio id="music" src="music.mp3" loop></audio>
 
-  <div class="card">
-    <h1>Surekha, will you be my Valentine? 💖</h1>
-    <div class="buttons">
-      <button id="yesBtn">Yes</button>
-      <button id="noBtn">No</button>
+<div class="card" id="app"></div>
+
+<script>
+const app = document.getElementById("app");
+const music = document.getElementById("music");
+const musicToggle = document.getElementById("musicToggle");
+let playing = false;
+
+musicToggle.onclick = () => {
+  playing ? music.pause() : music.play();
+  musicToggle.textContent = playing ? "🎵" : "⏸️";
+  playing = !playing;
+};
+
+/* -------- STAGE 1 (MOVING NO — DESKTOP + MOBILE) -------- */
+function stage1() {
+  app.innerHTML = `
+    <h1>Surekha 💖</h1>
+    <p>Will you be my Valentine?</p>
+    <div class="buttons" id="btnWrap">
+      <button class="yes" id="yes1">Yes</button>
+      <button class="no" id="no1">No</button>
     </div>
-  </div>
+  `;
 
-  <audio id="music" src="music.mp3" loop></audio>
+  const noBtn = document.getElementById("no1");
+  const yesBtn = document.getElementById("yes1");
+  const wrap = document.getElementById("btnWrap");
 
-  <script>
-    const noBtn = document.getElementById("noBtn");
-    const yesBtn = document.getElementById("yesBtn");
-    const music = document.getElementById("music");
-    const musicToggle = document.getElementById("musicToggle");
+  function moveNo() {
+    const wrapRect = wrap.getBoundingClientRect();
 
-    let playing = false;
+    const maxX = wrapRect.width / 2 - 40;
+    const maxY = 60;
 
-    musicToggle.onclick = () => {
-      if (!playing) {
-        music.play();
-        musicToggle.textContent = "⏸️";
-      } else {
-        music.pause();
-        musicToggle.textContent = "🎵";
-      }
-      playing = !playing;
-    };
+    const x = (Math.random() * maxX * 2) - maxX;
+    const y = (Math.random() * maxY * 2) - maxY;
 
-    /* ✅ GOOD NO LOGIC (playful, bounded, smooth) */
-    noBtn.onmouseover = () => {
-      const x = Math.random() * 120 - 60;  // left/right
-      const y = Math.random() * 80 - 40;   // up/down
-      noBtn.style.transform = `translate(${x}px, ${y}px)`;
-    };
+    noBtn.style.transform = `translate(${x}px, ${y}px)`;
+  }
 
-    yesBtn.onclick = () => {
-      document.body.innerHTML = `
-        <div style="
-          height:100vh;
-          display:flex;
-          justify-content:center;
-          align-items:center;
-          font-size:32px;
-          background:linear-gradient(135deg,#ff9a9e,#fad0c4);
-        ">
-          ✨ I love you. 😘 ✨
-        </div>
-      `;
-    };
+  // Desktop
+  noBtn.addEventListener("mouseover", moveNo);
 
-    noBtn.onclick = () => {
-      window.location.href = "no.html";
-    };
-  </script>
+  // Mobile
+  noBtn.addEventListener("touchstart", (e) => {
+    e.preventDefault(); // stops accidental click
+    moveNo();
+  });
+
+  yesBtn.onclick = stage2;
+  noBtn.onclick = stage2;
+}
+
+/* -------- STAGE 2 (PASSWORD) -------- */
+function stage2() {
+  app.innerHTML = `
+    <h1>One last thing 😌</h1>
+    <p>Answer if you're really sure</p>
+    <p><b>What is a kiss called?</b></p>
+    <input id="pwd" placeholder="type here">
+    <br><br>
+    <button class="yes" onclick="checkPwd()">Continue</button>
+    <p id="err" style="color:red;"></p>
+  `;
+}
+
+function checkPwd() {
+  const val = document.getElementById("pwd").value.trim().toLowerCase();
+  if (val === "waterapple") stage3();
+  else document.getElementById("err").textContent = "Hmm… try again 😏";
+}
+
+/* -------- STAGE 3 (PHOTO + FINAL ASK) -------- */
+function stage3() {
+  app.innerHTML = `
+    <img src="us.jpg">
+    <p>
+      Write your paragraph here.<br>
+      Keep it real. Keep it yours.
+    </p>
+    <h1>Will you be my Valentine jaan? 💕</h1>
+    <div class="buttons">
+      <button class="yes" onclick="goodGirl()">Yes</button>
+      <button class="no" onclick="badGirl()">No</button>
+    </div>
+  `;
+}
+
+/* -------- FINAL SCREENS -------- */
+function goodGirl() {
+  app.innerHTML = `<h1>Good girl ❤️</h1>`;
+}
+
+function badGirl() {
+  app.innerHTML = `<h1>Bad girl 😏</h1>`;
+}
+
+/* INIT */
+stage1();
+</script>
 
 </body>
 </html>
